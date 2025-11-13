@@ -44,7 +44,7 @@ func (f *WKHTMLFileFormatter) GenerateHTML(evaluation domain.Evaluation) (string
 func (f *WKHTMLFileFormatter) ConvertHTMLtoPDF(html string) ([]byte, error) {
 	// ==== Branding / estilos ====
 	const (
-		brandName        = "NeuroApp"
+		brandName        = "NeuroSuite"
 		pageW, pageH     = 210.0, 297.0 // A4 mm
 		marginL, marginT = 15.0, 18.0
 		marginR, marginB = 15.0, 18.0
@@ -93,6 +93,9 @@ func (f *WKHTMLFileFormatter) ConvertHTMLtoPDF(html string) ([]byte, error) {
 		setDraw(pdf, color{230, 230, 230})
 		pdf.SetLineWidth(0.2)
 		pdf.Line(marginL, brandBarHeight, pageW-marginR, brandBarHeight)
+		if pdf.GetY() < marginT {
+			pdf.SetY(marginT)
+		}
 	})
 
 	// Footer
@@ -108,7 +111,6 @@ func (f *WKHTMLFileFormatter) ConvertHTMLtoPDF(html string) ([]byte, error) {
 	// ==== Título ====
 	setText(pdf, darkText)
 	pdf.SetFont("Helvetica", "B", titleSize)
-	pdf.CellFormat(0, 10, tr("Informe Neuropsicológico"), "", 1, "L", false, 0, "")
 	pdf.Ln(2)
 
 	// ==== Tarjeta de información Paciente/Especialista ====
@@ -156,7 +158,7 @@ func drawInfoCard(
 	setFill(pdf, bg)
 	setDraw(pdf, color{220, 225, 228})
 	pdf.SetLineWidth(0.2)
-	roundedRect(pdf, x, y, "") // reset? no
+	roundedRect(x, y, "") // reset? no
 	// Calcular el ancho disponible usando GetPageSize y GetMargins
 	pageW, _ := pdf.GetPageSize()
 	_, _, right, _ := pdf.GetMargins()
@@ -217,13 +219,16 @@ func writeBody(pdf *fpdf.Fpdf, tr func(string) string, text string, lineH float6
 			continue
 		}
 		if strings.HasPrefix(l, "- ") || strings.HasPrefix(l, "• ") || strings.HasPrefix(l, "* ") {
-			// viñeta
-			pdf.SetX(pdf.GetX() + 2)
-			pdf.CellFormat(3, lineH, tr("•"), "", 0, "", false, 0, "")
+			baseX := pdf.GetX()
+			// bullet
+			pdf.CellFormat(4, lineH, tr("•"), "", 0, "L", false, 0, "")
+			pdf.SetX(baseX + 6) // sangría del texto
 			pdf.MultiCell(0, lineH, tr(strings.TrimSpace(l[2:])), "", "L", false)
+			pdf.SetX(baseX) // restaura X para la siguiente línea
 		} else {
 			pdf.MultiCell(0, lineH, tr(l), "", "L", false)
 		}
+
 	}
 }
 
@@ -287,6 +292,15 @@ func htmlToText(s string) string {
 	s = strings.TrimSpace(s)
 	reSpace := regexp.MustCompile(`[ \t]+`)
 	s = reSpace.ReplaceAllString(s, " ")
+	s = strings.ReplaceAll(s, "</h3>", "\n\n")
+
+	// Normaliza listas
+	s = strings.ReplaceAll(s, "</ul>", "\n")
+	s = strings.ReplaceAll(s, "</ol>", "\n")
+	reUl := regexp.MustCompile(`(?is)<ul[^>]*>`)
+	reOl := regexp.MustCompile(`(?is)<ol[^>]*>`)
+	s = reUl.ReplaceAllString(s, "\n")
+	s = reOl.ReplaceAllString(s, "\n")
 
 	// Colapsa saltos múltiples
 	s = normalizeWhitespace(s)
@@ -295,7 +309,7 @@ func htmlToText(s string) string {
 
 // ======== PRIVADO: util ========
 
-func roundedRect(pdf *fpdf.Fpdf, x, y float64, _ string) {
+func roundedRect(x, y float64, _ string) {
 	_ = x
 	_ = y
 	// No hace nada: dejamos la API por si quieres evolucionar
