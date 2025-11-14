@@ -50,6 +50,8 @@ func (oa OpenAIService) GenerateAnalysis(ev domain.Evaluation) (string, error) {
 Vas a analizar una evaluación **anónima** compuesta por subtests estandarizados.
 Trabaja SOLO con los datos proporcionados (no inventes, no infieras identidad, edad o demografía) y **omite cualquier referencia personal**.
 
+MUY importante: Debes comentar antes del primer titulo, despues del header, la lista de subtests utilizados en este Cribado neurológico.
+
 REGLAS CRÍTICAS
 - Ten en cuenta la edad del paciente cuando esté disponible en la entrada.
 - Usa únicamente subtests **con datos válidos**. Considera “sin datos” cualquier subtest con status en {pending, processing}, campos nulos, vacíos o marcados como no evaluados.
