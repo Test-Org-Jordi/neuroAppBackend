@@ -24,6 +24,8 @@ require (
 )
 
 require (
+	github.com/getsentry/sentry-go v0.37.0
+	github.com/getsentry/sentry-go/gin v0.37.0
 	github.com/go-pdf/fpdf v0.9.0
 	github.com/yuin/goldmark v1.7.13
 )
@@ -48,8 +50,6 @@ require (
 	github.com/cloudwego/base64x v0.1.5 // indirect
 	github.com/ericlagergren/decimal v0.0.0-20190420051523-6335edbaa640 // indirect
 	github.com/gabriel-vasile/mimetype v1.4.9 // indirect
-	github.com/getsentry/sentry-go v0.37.0 // indirect
-	github.com/getsentry/sentry-go/gin v0.37.0 // indirect
 	github.com/gin-contrib/sse v1.1.0 // indirect
 	github.com/go-gorp/gorp/v3 v3.1.0 // indirect
 	github.com/go-playground/locales v0.14.1 // indirect
