@@ -55,7 +55,7 @@ func main() {
 	api := router.Group("/api")
 	{
 		api.GET("/ping", func(c *gin.Context) {
-			c.JSON(http.StatusOK, gin.H{"message": "pongg"})
+			c.JSON(http.StatusOK, gin.H{"message": "pong"})
 		})
 	}
 	port := fmt.Sprintf(":%s", os.Getenv("PORT"))
@@ -67,13 +67,19 @@ func main() {
 		Handler: router,
 	}
 
-	log.Printf("Server listening on port: " + port)
-	if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-		log.Fatalf("Listen error: %s\n", err)
-	}
-
+	// Set up graceful shutdown
 	quit := make(chan os.Signal, 1)
 	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
+
+	// Start server in a goroutine
+	go func() {
+		log.Printf("Server listening on port: " + port)
+		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+			log.Fatalf("Listen error: %s\n", err)
+		}
+	}()
+
+	// Wait for interrupt signal
 	<-quit
 	log.Println("Shutting down server...")
 

@@ -40,7 +40,7 @@ NeuroApp digitaliza subtests neuropsicológicos (HVLT-R, BVMT-R, TMT, Clock Draw
 ## 🧩 Stack
 
 * **Backend:** Go (Gin), DDD + hexagonal, SQLBoiler, migraciones.
-* **DB:** PostgreSQL.
+* **DB:** MySQL.
 * **Frontend:** React Native (Expo) y Next.js (web) *(si aplica en este repo)*.
 * **Infra:** AWS (Fargate para API), **Lambda** para generación de PDF, **S3** (archivos), **SES** (emails), **Cognito** (auth).
 * **CI:** GitHub Actions (build + test + coverage).
@@ -75,7 +75,7 @@ flowchart LR
     API[HTTP API (Gin)] --> APP[Application Layer\nUse Cases]
     APP --> DOM[Domain (DDD)]
     APP --> ADP[(Adapters)]
-    ADP --> DB[(PostgreSQL)]
+    ADP --> DB[(MySQL)]
     ADP --> S3[(S3 - Storage)]
     ADP --> SES[(SES - Email)]
     ADP --> COG[(Cognito - Auth)]
@@ -91,7 +91,7 @@ flowchart LR
 ### Requisitos
 
 * Go **1.22+**
-* MYSQL **13+**
+* MySQL **8+**
 * Node + npm **18/20** (frontend)
 
 ### Variables de entorno (ejemplo)
@@ -100,7 +100,7 @@ Crea `.env` (o usa tu gestor de secretos):
 
 ```
 ENV=local
-DB_DSN=postgres://user:pass@localhost:5432/neuroapp?sslmode=disable
+DB_DSN=user:pass@tcp(localhost:3306)/neuroapp?parseTime=true
 AWS_REGION=eu-west-1
 S3_BUCKET=neuroapp-reports
 SES_SENDER=noreply@tu-dominio.com
@@ -111,7 +111,7 @@ COGNITO_CLIENT_ID=YYYY
 ### Migraciones & arranque
 
 ```bash
-# 1) Levanta Postgres y aplica migraciones
+# 1) Levanta MySQL y aplica migraciones
 make migrate          # o tu herramienta favorita
 
 # 2) Ejecuta API
