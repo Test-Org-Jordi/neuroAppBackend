@@ -10,6 +10,8 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/getsentry/sentry-go"
+
 	"github.com/gin-gonic/gin"
 	"neuro.app.jordi/internal/api"
 	"neuro.app.jordi/internal/shared/mysql"
@@ -21,16 +23,35 @@ type Config struct {
 }
 
 func main() {
+	ctx := context.Background()
+	logger := sentry.NewLogger(ctx)
+
+	// Or inline using WithCtx()
+	newCtx := context.Background()
+	// WithCtx() does not modify the original context attached on the logger.
+	logger.Info().WithCtx(newCtx).Emit("context passed")
+
+	// You can use the logger like [fmt.Print]
+	logger.Info().Emit("Hello ", "world!")
+	// Or like [fmt.Printf]
+	logger.Info().Emitf("Hello %v!", "world")
+	if err := sentry.Init(sentry.ClientOptions{
+		Dsn:              "https://9dd2a33646f1f50da7e3af6956925028@o4510365181935616.ingest.de.sentry.io/4510368658489424",
+		Environment:      "prod",
+		TracesSampleRate: 1.0, // captura todo
+		EnableLogs:       true,
+		EnableTracing:    true,
+	}); err != nil {
+		fmt.Printf("Sentry initialization failed: %v\n", err)
+	}
+	defer sentry.Flush(2 * time.Second)
+
 	db, err := mysql.NewMySQL()
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	router := api.NewApp(db).SetupRouter()
-
-	router.Use(gin.Logger())
-	router.Use(gin.Recovery())
-
 	api := router.Group("/api")
 	{
 		api.GET("/ping", func(c *gin.Context) {
