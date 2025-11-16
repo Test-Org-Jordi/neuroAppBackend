@@ -8,7 +8,6 @@ import (
 )
 
 func CreateVerbalMemorySubtestCommandhandler(ctx context.Context, command CreateVerbalMemorySubtestCommand, evaluationRepository domain.EvaluationsRepository, llmService domain.LLMService, verbalMemorySubtestRepo VEMdomain.VerbalMemoryRepository) (VEMdomain.VerbalMemorySubtest, error) {
-
 	verbalSubtest, err := VEMdomain.NewVerbalMemorySubtest(command.EvaluationID, command.StartAt, command.GivenWords, command.RecalledWords, command.Subtype)
 	if err != nil {
 		return VEMdomain.VerbalMemorySubtest{}, err

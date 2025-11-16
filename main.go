@@ -58,6 +58,7 @@ func main() {
 			c.JSON(http.StatusOK, gin.H{"message": "pongg"})
 		})
 	}
+
 	port := fmt.Sprintf(":%s", os.Getenv("PORT"))
 	if port == "" || port == ":" {
 		port = ":8401"

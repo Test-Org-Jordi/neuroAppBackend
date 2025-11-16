@@ -184,13 +184,14 @@ func (app *App) GetEvaluation(c *gin.Context) {
 func (app *App) CreateEvaluation(c *gin.Context) {
 	var command createevaluation.CreateEvaluationCommand
 	if err := c.ShouldBindJSON(&command); err != nil {
-		captureSentry(c, err, err.Error())
+		captureSentry(c, err, "error parsing when creating evaluation")
 		app.Logger.Error(c.Request.Context(), "error parsing when creating evaluation", err, c.Keys)
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-
 	evaluation, err := createevaluation.CreateEvaluationCommandHandler(command, c, app.Repositories.EvaluationsRepository)
+	fakerr := errors.New("fake error to test sentry")
+	captureSentry(c, fakerr, "testing sentry error capture")
 	if err != nil {
 		captureSentry(c, err, err.Error())
 		app.Logger.Error(c.Request.Context(), "error creating evaluation", err, c.Keys)
@@ -235,6 +236,8 @@ func (app *App) FinnishEvaluation(c *gin.Context) {
 }
 
 func (app *App) CreateLetterCancellationSubtest(c *gin.Context) {
+	fakerr := errors.New("test webhook error to sentry")
+	captureSentry(c, fakerr, "testing sentry error capture")
 	var command createlettercancelationsubtest.CreateLetterCancellationSubtestCommand
 	if err := c.ShouldBindJSON(&command); err != nil {
 		captureSentry(c, err, err.Error())

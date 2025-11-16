@@ -14,6 +14,7 @@ import (
 	"golang.org/x/time/rate"
 	authD "neuro.app.jordi/internal/auth/domain"
 	"neuro.app.jordi/internal/evaluation/domain"
+	"neuro.app.jordi/internal/evaluation/infra"
 	services "neuro.app.jordi/internal/evaluation/services/openAI"
 
 	authI "neuro.app.jordi/internal/auth/infra"
@@ -79,7 +80,7 @@ type Services struct {
 func getAppRepositories(db *sql.DB) Repositories {
 
 	return Repositories{
-		// EvaluationsRepository:               infra.NewEvaluationsMYSQLRepository(db),
+		EvaluationsRepository:               infra.NewEvaluationsMYSQLRepository(db),
 		LetterCancellationRepository:        LCinfra.NewMYSQLLetterCancellationRepository(db),
 		VerbalMemorySubtestRepository:       VEMinfra.NewVerbalMemoryMYSQLRepository(db),
 		ExecutiveFunctionsSubtestRepository: EFinfra.NewExecutiveFunctionsSubtestMYSQLRepository(db),
