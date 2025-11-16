@@ -190,8 +190,6 @@ func (app *App) CreateEvaluation(c *gin.Context) {
 		return
 	}
 	evaluation, err := createevaluation.CreateEvaluationCommandHandler(command, c, app.Repositories.EvaluationsRepository)
-	fakerr := errors.New("fake error to test sentry")
-	captureSentry(c, fakerr, "testing sentry error capture")
 	if err != nil {
 		captureSentry(c, err, err.Error())
 		app.Logger.Error(c.Request.Context(), "error creating evaluation", err, c.Keys)
@@ -236,8 +234,6 @@ func (app *App) FinnishEvaluation(c *gin.Context) {
 }
 
 func (app *App) CreateLetterCancellationSubtest(c *gin.Context) {
-	fakerr := errors.New("test webhook error to sentry")
-	captureSentry(c, fakerr, "testing sentry error capture")
 	var command createlettercancelationsubtest.CreateLetterCancellationSubtestCommand
 	if err := c.ShouldBindJSON(&command); err != nil {
 		captureSentry(c, err, err.Error())
