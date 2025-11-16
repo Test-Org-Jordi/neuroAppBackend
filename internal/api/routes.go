@@ -7,11 +7,14 @@ import (
 	"os"
 	"time"
 
+	sentrygin "github.com/getsentry/sentry-go/gin"
+
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"golang.org/x/time/rate"
 	authD "neuro.app.jordi/internal/auth/domain"
 	"neuro.app.jordi/internal/evaluation/domain"
+	"neuro.app.jordi/internal/evaluation/infra"
 	services "neuro.app.jordi/internal/evaluation/services/openAI"
 
 	authI "neuro.app.jordi/internal/auth/infra"
@@ -21,7 +24,6 @@ import (
 	VEMdomain "neuro.app.jordi/internal/evaluation/domain/sub-tests/verbal-memory"
 	VIMdomain "neuro.app.jordi/internal/evaluation/domain/sub-tests/visual-memory"
 	VPdomain "neuro.app.jordi/internal/evaluation/domain/sub-tests/visual-spatial"
-	"neuro.app.jordi/internal/evaluation/infra"
 	speechtotext "neuro.app.jordi/internal/evaluation/infra/speech-to-text"
 	EFinfra "neuro.app.jordi/internal/evaluation/infra/sub-tests/executive-functions"
 	LFinfra "neuro.app.jordi/internal/evaluation/infra/sub-tests/language-fluency"
@@ -118,8 +120,10 @@ func NewApp(db *sql.DB) *App {
 
 func (app *App) SetupRouter() *gin.Engine {
 	r := gin.New()
+	r.Use(sentrygin.New(sentrygin.Options{Repanic: true}))
+
 	r.SetTrustedProxies(nil)
-	r.Use(gin.Logger(), gin.Recovery())
+	r.Use(gin.Logger())
 	if os.Getenv("environment") != "local" {
 		gin.SetMode(gin.ReleaseMode)
 	}

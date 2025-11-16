@@ -92,6 +92,7 @@ func (app *App) ListEvaluations(c *gin.Context) {
 	// 1) Bind de query params
 	var dto listEvaluationsQueryDTO
 	if err := c.ShouldBindQuery(&dto); err != nil {
+		captureSentry(c, err, err.Error())
 		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid query params", "details": err.Error()})
 		return
 	}
@@ -113,12 +114,14 @@ func (app *App) ListEvaluations(c *gin.Context) {
 	// 3) Parse de fechas (opcionales)
 	from, err := parseTimeFlexible(dto.FromDateStr)
 	if err != nil {
+		captureSentry(c, err, err.Error())
 		app.Logger.Error(c.Request.Context(), "error parsing from_date", err, c.Keys)
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error(), "param": "from_date"})
 		return
 	}
 	to, err := parseTimeFlexible(dto.ToDateStr)
 	if err != nil {
+		captureSentry(c, err, err.Error())
 		app.Logger.Error(c.Request.Context(), "error parsing to_date", err, c.Keys)
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error(), "param": "to_date"})
 		return
@@ -140,6 +143,7 @@ func (app *App) ListEvaluations(c *gin.Context) {
 		app.Repositories.EvaluationsRepository,
 	)
 	if err != nil {
+		captureSentry(c, err, err.Error())
 		app.Logger.Error(c.Request.Context(), "error listing evaluations", err, c.Keys)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -167,6 +171,7 @@ func (app *App) GetEvaluation(c *gin.Context) {
 	query.EvaluationID = id
 	evaluation, err := getevaluation.GetEvaluationQueryHandler(c.Request.Context(), query, app.Repositories.EvaluationsRepository, app.Repositories.VerbalMemorySubtestRepository, app.Repositories.VisualMemorySubtestRepository, app.Repositories.ExecutiveFunctionsSubtestRepository, app.Repositories.LetterCancellationRepository, app.Repositories.LanguageFluencyRepository, app.Repositories.VisualSpatialRepository)
 	if err != nil {
+		captureSentry(c, err, err.Error())
 		app.Logger.Error(c.Request.Context(), "error getting evaluation", err, nil)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "internal error"})
 		return
@@ -179,13 +184,14 @@ func (app *App) GetEvaluation(c *gin.Context) {
 func (app *App) CreateEvaluation(c *gin.Context) {
 	var command createevaluation.CreateEvaluationCommand
 	if err := c.ShouldBindJSON(&command); err != nil {
+		captureSentry(c, err, "error parsing when creating evaluation")
 		app.Logger.Error(c.Request.Context(), "error parsing when creating evaluation", err, c.Keys)
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-
 	evaluation, err := createevaluation.CreateEvaluationCommandHandler(command, c, app.Repositories.EvaluationsRepository)
 	if err != nil {
+		captureSentry(c, err, err.Error())
 		app.Logger.Error(c.Request.Context(), "error creating evaluation", err, c.Keys)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -199,6 +205,7 @@ func (app *App) CreateEvaluation(c *gin.Context) {
 func (app *App) FinnishEvaluation(c *gin.Context) {
 	var command finishevaluation.FinisEvaluationCommannd
 	if err := c.ShouldBindJSON(&command); err != nil {
+		captureSentry(c, err, err.Error())
 		app.Logger.Error(c.Request.Context(), "error parsing when finishiing evaluation", err, c.Keys)
 		c.JSON(http.StatusBadRequest, gin.H{"error": "internal error"})
 		return
@@ -214,6 +221,7 @@ func (app *App) FinnishEvaluation(c *gin.Context) {
 		app.Repositories.VisualMemorySubtestRepository, app.Repositories.ExecutiveFunctionsSubtestRepository, app.Repositories.LetterCancellationRepository, app.Repositories.LanguageFluencyRepository, app.Repositories.VisualSpatialRepository,
 		app.Services.MailService)
 	if err != nil {
+		captureSentry(c, err, err.Error())
 		app.Logger.Error(c.Request.Context(), "error when finishiing evaluation", err, c.Keys)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -228,6 +236,7 @@ func (app *App) FinnishEvaluation(c *gin.Context) {
 func (app *App) CreateLetterCancellationSubtest(c *gin.Context) {
 	var command createlettercancelationsubtest.CreateLetterCancellationSubtestCommand
 	if err := c.ShouldBindJSON(&command); err != nil {
+		captureSentry(c, err, err.Error())
 		app.Logger.Error(c.Request.Context(), "error parsing when creating letter cancellation evaluation", err, c.Keys)
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -235,6 +244,7 @@ func (app *App) CreateLetterCancellationSubtest(c *gin.Context) {
 
 	subtest, err := createlettercancelationsubtest.CreateLetterCancellationSubtestCommandHandler(c.Request.Context(), command, app.Repositories.LetterCancellationRepository, app.Repositories.EvaluationsRepository, app.Services.LLMService)
 	if err != nil {
+		captureSentry(c, err, err.Error())
 		app.Logger.Error(c.Request.Context(), "error  when creating letter cancellation evaluation", err, c.Keys)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -246,6 +256,7 @@ func (app *App) CreateLetterCancellationSubtest(c *gin.Context) {
 func (app *App) VerbalMemorySubtest(c *gin.Context) {
 	var command createverbalmemorysubtest.CreateVerbalMemorySubtestCommand
 	if err := c.ShouldBindJSON(&command); err != nil {
+		captureSentry(c, err, err.Error())
 		app.Logger.Error(c.Request.Context(), "error parsing when creating verbal memory evaluation", err, c.Keys)
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -253,6 +264,7 @@ func (app *App) VerbalMemorySubtest(c *gin.Context) {
 
 	subtest, err := createverbalmemorysubtest.CreateVerbalMemorySubtestCommandhandler(c.Request.Context(), command, app.Repositories.EvaluationsRepository, app.Services.LLMService, app.Repositories.VerbalMemorySubtestRepository)
 	if err != nil {
+		captureSentry(c, err, err.Error())
 		app.Logger.Error(c.Request.Context(), "error when creating letter cancellation evaluation", err, c.Keys)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -264,6 +276,7 @@ func (app *App) VerbalMemorySubtest(c *gin.Context) {
 func (app *App) ExecutiveFunctionsSubtest(c *gin.Context) {
 	var command createexecutivefunctionssubtest.CreateExecutiveFunctionsSubtestCommand
 	if err := c.ShouldBindJSON(&command); err != nil {
+		captureSentry(c, err, err.Error())
 		app.Logger.Error(c.Request.Context(), "error parsing when creating executive function evaluation", err, c.Keys)
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -271,6 +284,7 @@ func (app *App) ExecutiveFunctionsSubtest(c *gin.Context) {
 
 	subtest, err := createexecutivefunctionssubtest.CreateExecutiveFunctionsSubtestCommandHandler(c.Request.Context(), command, app.Repositories.EvaluationsRepository, app.Services.LLMService, app.Repositories.ExecutiveFunctionsSubtestRepository)
 	if err != nil {
+		captureSentry(c, err, err.Error())
 		app.Logger.Error(c.Request.Context(), "error  when creating executive function evaluation", err, c.Keys)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -288,6 +302,7 @@ func (app *App) LanguageFluencySubtest(c *gin.Context) {
 	default: // JSON u otros -> intentamos JSON como hasta ahora
 		var command createlanguagefluencysubtest.CreateLanguageFluencySubtestCommand
 		if err := c.ShouldBindJSON(&command); err != nil {
+			captureSentry(c, err, err.Error())
 			app.Logger.Error(c.Request.Context(), "error parsing when creating language fluency evaluation (json path)", err, c.Keys)
 			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 			return
@@ -304,6 +319,7 @@ func (app *App) languageFluencyFromMultipart(c *gin.Context) {
 	// 2) Leer archivo de audio
 	fileHeader, err := c.FormFile("audio")
 	if err != nil {
+		captureSentry(c, err, err.Error())
 		app.Logger.Error(c.Request.Context(), "missing audio file", err, c.Keys)
 		c.JSON(http.StatusBadRequest, gin.H{"error": "missing 'audio' file"})
 		return
@@ -314,6 +330,8 @@ func (app *App) languageFluencyFromMultipart(c *gin.Context) {
 	}
 	f, err := fileHeader.Open()
 	if err != nil {
+		captureSentry(c, err, err.Error())
+
 		app.Logger.Error(c.Request.Context(), "cannot open audio", err, c.Keys)
 		c.JSON(http.StatusBadRequest, gin.H{"error": "cannot open audio file"})
 		return
@@ -322,6 +340,7 @@ func (app *App) languageFluencyFromMultipart(c *gin.Context) {
 
 	audioBytes, err := io.ReadAll(f)
 	if err != nil {
+		captureSentry(c, err, err.Error())
 		app.Logger.Error(c.Request.Context(), "cannot read audio", err, c.Keys)
 		c.JSON(http.StatusBadRequest, gin.H{"error": "cannot read audio file"})
 		return
@@ -352,6 +371,7 @@ func (app *App) languageFluencyFromMultipart(c *gin.Context) {
 		audioBytes[i] = 0
 	}
 	if err != nil {
+		captureSentry(c, err, err.Error())
 		app.Logger.Error(c.Request.Context(), "speech-to-text error", err, c.Keys)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to transcribe audio"})
 		return
@@ -395,6 +415,7 @@ func (app *App) execLanguageFluencyCommand(
 		app.Repositories.LanguageFluencyRepository,
 	)
 	if err != nil {
+		captureSentry(c, err, err.Error())
 		// Envuelve errores de dominio comunes para devolver 400 en vez de 500 si aplica
 		if errors.Is(err, context.DeadlineExceeded) {
 			c.JSON(http.StatusGatewayTimeout, gin.H{"error": "timeout"})
@@ -446,6 +467,7 @@ func (app *App) CreateVisualMemorySubtest(c *gin.Context) {
 
 	sub, err := createvisualmemorysubtest.CreateVisualMemoryCommandHandler(c.Request.Context(), cmd, app.Repositories.VisualMemorySubtestRepository)
 	if err != nil {
+		captureSentry(c, err, err.Error())
 		app.Logger.Error(c.Request.Context(), "error when creating visual memory evaluation", err, c.Keys)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -463,6 +485,7 @@ func (app *App) CreateVisualSpatialSubtest(c *gin.Context) {
 
 	sub, err := createvisualspatialsubtest.CreateViusualSpatialCommandHandler(c.Request.Context(), cmd, app.Repositories.VisualSpatialRepository)
 	if err != nil {
+		captureSentry(c, err, err.Error())
 		app.Logger.Error(c.Request.Context(), "error when creating visual spatial evaluation", err, c.Keys)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -488,6 +511,7 @@ func (app *App) CanFinishEvaluation(c *gin.Context) {
 	}
 	canFinish, err := canfinishevaluation.CanFinishEvaluationQueryHandler(c.Request.Context(), query, app.Repositories.EvaluationsRepository, app.Repositories.VerbalMemorySubtestRepository, app.Repositories.VisualMemorySubtestRepository, app.Repositories.ExecutiveFunctionsSubtestRepository, app.Repositories.LetterCancellationRepository, app.Repositories.LanguageFluencyRepository, app.Repositories.VisualSpatialRepository)
 	if err != nil {
+		captureSentry(c, err, err.Error())
 		app.Logger.Error(c.Request.Context(), "error checking if can finish evaluation", err, c.Keys)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
