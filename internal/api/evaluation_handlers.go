@@ -182,8 +182,6 @@ func (app *App) GetEvaluation(c *gin.Context) {
 	})
 }
 func (app *App) CreateEvaluation(c *gin.Context) {
-	fakeErr := errors.New("fake error for testing Sentry integration")
-	captureSentry(c, fakeErr, "This is a test error to verify Sentry integration")
 	var command createevaluation.CreateEvaluationCommand
 	if err := c.ShouldBindJSON(&command); err != nil {
 		captureSentry(c, err, "error parsing when creating evaluation")
