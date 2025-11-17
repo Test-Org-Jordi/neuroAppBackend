@@ -23,6 +23,7 @@ import (
 	VEMdomain "neuro.app.jordi/internal/evaluation/domain/sub-tests/verbal-memory"
 	VIMdomain "neuro.app.jordi/internal/evaluation/domain/sub-tests/visual-memory"
 	VPdomain "neuro.app.jordi/internal/evaluation/domain/sub-tests/visual-spatial"
+	evalinfra "neuro.app.jordi/internal/evaluation/infra"
 	speechtotext "neuro.app.jordi/internal/evaluation/infra/speech-to-text"
 	EFinfra "neuro.app.jordi/internal/evaluation/infra/sub-tests/executive-functions"
 	LFinfra "neuro.app.jordi/internal/evaluation/infra/sub-tests/language-fluency"
@@ -79,6 +80,7 @@ type Services struct {
 func getAppRepositories(db *sql.DB) Repositories {
 
 	return Repositories{
+		EvaluationsRepository:               evalinfra.NewEvaluationsMYSQLRepository(db),
 		LetterCancellationRepository:        LCinfra.NewMYSQLLetterCancellationRepository(db),
 		VerbalMemorySubtestRepository:       VEMinfra.NewVerbalMemoryMYSQLRepository(db),
 		ExecutiveFunctionsSubtestRepository: EFinfra.NewExecutiveFunctionsSubtestMYSQLRepository(db),
