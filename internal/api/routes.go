@@ -17,7 +17,6 @@ import (
 	services "neuro.app.jordi/internal/evaluation/services/openAI"
 
 	authI "neuro.app.jordi/internal/auth/infra"
-	evalinfra "neuro.app.jordi/internal/evaluation/infra"
 	EFdomain "neuro.app.jordi/internal/evaluation/domain/sub-tests/executive-functions"
 	LFdomain "neuro.app.jordi/internal/evaluation/domain/sub-tests/language-fluency"
 	LCdomain "neuro.app.jordi/internal/evaluation/domain/sub-tests/letter-cancellation"
@@ -80,7 +79,6 @@ type Services struct {
 func getAppRepositories(db *sql.DB) Repositories {
 
 	return Repositories{
-		EvaluationsRepository:               evalinfra.NewEvaluationsMYSQLRepository(db),
 		LetterCancellationRepository:        LCinfra.NewMYSQLLetterCancellationRepository(db),
 		VerbalMemorySubtestRepository:       VEMinfra.NewVerbalMemoryMYSQLRepository(db),
 		ExecutiveFunctionsSubtestRepository: EFinfra.NewExecutiveFunctionsSubtestMYSQLRepository(db),
