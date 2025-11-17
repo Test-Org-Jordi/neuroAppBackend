@@ -183,7 +183,7 @@ func (app *App) GetEvaluation(c *gin.Context) {
 }
 func (app *App) CreateEvaluation(c *gin.Context) {
 	var command createevaluation.CreateEvaluationCommand
-	if err := c.ShouldBindJSON(&command); err == nil {
+	if err := c.ShouldBindJSON(&command); err != nil {
 		captureSentry(c, err, "error parsing when creating evaluation")
 		app.Logger.Error(c.Request.Context(), "error parsing when creating evaluation", err, c.Keys)
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
