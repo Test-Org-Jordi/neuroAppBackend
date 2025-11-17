@@ -189,7 +189,7 @@ func (app *App) CreateEvaluation(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	evaluation, err := createevaluation.CreateEvaluationCommandHandler(command, c, app.Repositories.EvaluationsRepository)
+	evaluation, err := createevaluation.CreateEvaluationCommandHandler(command, c.Request.Context(), app.Repositories.EvaluationsRepository)
 	if err != nil {
 		captureSentry(c, err, err.Error())
 		app.Logger.Error(c.Request.Context(), "error creating evaluation", err, c.Keys)
